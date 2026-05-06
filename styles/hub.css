@@ -1,3 +1,13 @@
+/* ============================================================
+   INDIE HUB — Estilos Globales
+   Optimizado para PS3 WebKit (antiguo)
+   - Sin box-shadow ni blur pesados
+   - Solo opacity + transform para animaciones
+   - Resolución objetivo: 1280x720
+   - Fuentes mínimo 16px para legibilidad en TV
+============================================================ */
+
+/* ---- Reset mínimo compatible con WebKit antiguo ---- */
 * {
   margin: 0;
   padding: 0;
@@ -5,6 +15,7 @@
   box-sizing: border-box;
 }
 
+/* ---- Variables CSS (no soportadas en PS3, se usan valores directos como fallback) ---- */
 :root {
   --bg-primary:    #0a0a0f;
   --bg-card:       #111118;
@@ -23,17 +34,18 @@
 
 /* ---- Base ---- */
 html, body {
-  width: 1280px;
+  width: 1280px;          /* Ancho fijo 720p — PS3 no hace reflow bien */
   min-height: 720px;
   overflow-x: hidden;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-body);
+  background: #0a0a0f;
+  color: #f0f0f0;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   -webkit-text-size-adjust: none;
 }
 
+/* Aceleración GPU global — crítico para PS3 */
 body > * {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
@@ -54,11 +66,11 @@ body > * {
   -webkit-align-items: center;
   align-items: center;
   gap: 8px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-dim);
+  background: #111118;
+  border: 1px solid #222233;
   border-radius: 4px;
   padding: 6px 12px;
-  font-family: var(--font-display);
+  font-family: 'Courier New', monospace;
   font-size: 12px;
   letter-spacing: 2px;
 }
@@ -72,17 +84,18 @@ body > * {
 }
 
 .gamepad-indicator.connected .led {
-  background: var(--accent-green);
+  background: #00ff88;
+  /* Parpadeo suave — solo opacity, PS3-safe */
   -webkit-animation: led-pulse 2s ease-in-out infinite;
   animation: led-pulse 2s ease-in-out infinite;
 }
 
 .gamepad-indicator.disconnected .led {
-  background: var(--accent-red);
+  background: #ff3355;
 }
- 
+
 .gamepad-indicator .label {
-  color: var(--text-secondary);
+  color: #999;
   font-size: 11px;
   letter-spacing: 2px;
 }
@@ -95,7 +108,7 @@ body > * {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
- 
+
 /* ============================================================
    PS3 WELCOME SCREEN
 ============================================================ */
@@ -103,7 +116,7 @@ body > * {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: var(--bg-primary);
+  background: #0a0a0f;
   display: -webkit-box;
   display: -webkit-flex;
   display: flex;
@@ -123,7 +136,7 @@ body > * {
 .ps3-logo {
   font-size: 14px;
   letter-spacing: 6px;
-  color: var(--accent-blue);
+  color: #4488ff;
   text-transform: uppercase;
   margin-bottom: 24px;
 }
@@ -133,11 +146,10 @@ body > * {
 }
 
 .ps3-welcome h1 {
-  font-family: var(--font-display);
+  font-family: 'Courier New', monospace;
   font-size: 48px;
-  color: var(--text-primary);
+  color: #f0f0f0;
   letter-spacing: 4px;
-  line-height: 1.2;
   margin-bottom: 16px;
 }
 
@@ -149,9 +161,9 @@ body > * {
 
 .ps3-btn-hint {
   font-size: 18px;
-  color: var(--accent-green);
+  color: #00ff88;
   letter-spacing: 2px;
-  border: 1px solid var(--accent-green);
+  border: 1px solid #00ff88;
   display: inline-block;
   padding: 12px 32px;
   border-radius: 4px;
@@ -189,4 +201,548 @@ body > * {
   z-index: 500;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+}
+
+.hub-logo {
+  font-family: 'Courier New', monospace;
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 6px;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 200px;
+  flex: 0 0 200px;
+}
+
+.logo-indie { color: #00ff88; }
+.logo-hub   { color: #f0f0f0; }
+
+.hub-nav {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 32px;
+}
+
+.nav-hint {
+  font-size: 13px;
+  color: #999;
+  letter-spacing: 1px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.hub-clock {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  color: #00ff88;
+  letter-spacing: 4px;
+  -webkit-flex: 0 0 80px;
+  flex: 0 0 80px;
+  text-align: right;
+}
+
+/* ============================================================
+   BUTTON ICONS (PS3 buttons)
+============================================================ */
+.btn-x  { color: #4488ff; font-weight: bold; font-size: 16px; }
+.btn-o  { color: #ff3355; font-weight: bold; font-size: 16px; }
+.btn-sq { color: #cc88ff; font-weight: bold; font-size: 16px; }
+.btn-tr { color: #00cc66; font-weight: bold; font-size: 16px; }
+.btn-dpad  { color: #aaa; font-size: 16px; }
+.btn-stick {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background: #333;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 20px;
+  text-align: center;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   MAIN CONTENT
+============================================================ */
+.hub-main {
+  padding: 80px 24px 80px;  /* espacio para header y footer */
+  min-height: 720px;
+}
+
+.section-title {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  letter-spacing: 6px;
+  color: #555;
+  margin-bottom: 24px;
+  padding-left: 4px;
+  border-left: 3px solid #00ff88;
+  padding-left: 12px;
+}
+
+/* ============================================================
+   GAMES GRID
+============================================================ */
+.games-grid {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* ============================================================
+   GAME CARD
+============================================================ */
+.game-card {
+  position: relative;
+  width: 280px;
+  min-height: 280px;
+  background: #111118;
+  border: 1px solid #222233;
+  border-radius: 4px;
+  padding: 20px;
+  cursor: pointer;
+  outline: none;
+  overflow: hidden;
+  /* GPU acceleration */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Transición solo con opacity+transform — PS3-safe */
+  -webkit-transition: border-color 0.15s, opacity 0.15s;
+  transition: border-color 0.15s, opacity 0.15s;
+}
+
+.game-card:focus,
+.game-card.focused {
+  border-color: #00ff88;
+  background: #1a1a28;
+}
+
+.game-card:focus .card-focus-ring,
+.game-card.focused .card-focus-ring {
+  opacity: 1;
+}
+
+/* Ring de focus — sin box-shadow (muy lento en PS3) */
+.card-focus-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid #00ff88;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  -webkit-transition: opacity 0.15s;
+  transition: opacity 0.15s;
+}
+
+.card-icon {
+  margin-bottom: 12px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+
+.card-body {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+}
+
+.card-title {
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: #f0f0f0;
+  margin-bottom: 4px;
+}
+
+.card-genre {
+  font-size: 12px;
+  color: #00ff88;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.card-desc {
+  font-size: 14px;
+  color: #aaa;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.card-controls {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ctrl-tag {
+  font-size: 12px;
+  color: #888;
+  background: #1a1a28;
+  border: 1px solid #333;
+  border-radius: 3px;
+  padding: 3px 8px;
+  letter-spacing: 1px;
+}
+
+/* Status badge */
+.card-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.status-available {
+  background: #001a0d;
+  color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.status-coming {
+  background: #1a1000;
+  color: #ffcc00;
+  border: 1px solid #ffcc00;
+}
+
+/* Card de añadir juego */
+.game-card--add {
+  border-style: dashed;
+  border-color: #333;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  text-align: center;
+  opacity: 0.5;
+}
+
+.game-card--add:focus,
+.game-card--add.focused {
+  opacity: 1;
+  border-color: #555;
+}
+
+/* ============================================================
+   GAME INFO PANEL (□ button)
+============================================================ */
+.game-info-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  background: rgba(10, 10, 15, 0.95);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-transition: opacity 0.2s;
+  transition: opacity 0.2s;
+}
+
+.info-panel-inner {
+  background: #111118;
+  border: 2px solid #00ff88;
+  border-radius: 6px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.info-title {
+  font-family: 'Courier New', monospace;
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.info-genre {
+  font-size: 13px;
+  color: #00ff88;
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.info-desc {
+  font-size: 18px;
+  color: #bbb;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.info-actions {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  gap: 16px;
+}
+
+.btn-primary,
+.btn-secondary {
+  font-family: 'Courier New', monospace;
+  font-size: 15px;
+  letter-spacing: 3px;
+  padding: 14px 28px;
+  border: 2px solid;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  -webkit-transition: opacity 0.15s;
+  transition: opacity 0.15s;
+}
+
+.btn-primary {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: #00ff88;
+  color: #0a0a0f;
+  outline: none;
+}
+
+.btn-secondary {
+  border-color: #555;
+  color: #aaa;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  border-color: #ff3355;
+  color: #ff3355;
+  outline: none;
+}
+
+/* ============================================================
+   GAME CONTAINER (iframe overlay)
+============================================================ */
+.game-container {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: #000;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.game-topbar {
+  height: 44px;
+  background: #0d0d14;
+  border-bottom: 1px solid #222233;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  padding: 0 20px;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
+}
+
+.game-topbar-title {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: #00ff88;
+}
+
+.game-close-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #aaa;
+  background: transparent;
+  border: 1px solid #333;
+  border-radius: 3px;
+  padding: 6px 14px;
+  cursor: pointer;
+  -webkit-transition: border-color 0.1s, color 0.1s;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.game-close-btn:hover,
+.game-close-btn:focus {
+  border-color: #ff3355;
+  color: #ff3355;
+  outline: none;
+}
+
+.game-iframe {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #000;
+}
+
+/* ============================================================
+   LOADING OVERLAY
+============================================================ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0a0a0f;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-orient: vertical;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #222;
+  border-top-color: #00ff88;
+  border-radius: 50%;
+  -webkit-animation: spin 0.8s linear infinite;
+  animation: spin 0.8s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+@keyframes spin {
+  to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: #555;
+  -webkit-animation: fade-pulse 1s ease-in-out infinite;
+  animation: fade-pulse 1s ease-in-out infinite;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+.hub-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 1280px;
+  height: 36px;
+  background: #0d0d14;
+  border-top: 1px solid #1a1a28;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 12px;
+  color: #444;
+  letter-spacing: 1px;
+  z-index: 400;
+}
+
+.fps-counter {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #555;
+  letter-spacing: 2px;
+}
+
+/* ============================================================
+   UTILITY — hidden
+============================================================ */
+.hidden {
+  display: none !important;
+}
+
+/* ---- Cards: animación de entrada (lazy) ---- */
+.game-card.card-enter {
+  opacity: 0;
+  -webkit-transform: translateY(20px) translateZ(0);
+  transform: translateY(20px) translateZ(0);
+}
+
+.game-card.card-visible {
+  opacity: 1;
+  -webkit-transform: translateY(0) translateZ(0);
+  transform: translateY(0) translateZ(0);
+  -webkit-transition: opacity 0.3s, -webkit-transform 0.3s;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+/* ---- Scanline sutil (decorativo, no caro) ---- */
+.hub-main::before {
+  content: '';
+  position: fixed;
+  top: 56px;
+  left: 0;
+  width: 1280px;
+  height: 2px;
+  background: #00ff88;
+  opacity: 0.03;
+  pointer-events: none;
 }
