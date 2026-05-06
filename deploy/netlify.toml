@@ -1,0 +1,63 @@
+# deploy/netlify.toml
+# Configuración de despliegue automático para Netlify
+# Documentación: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Directorio raíz del proyecto (relativo a este archivo que está en /deploy/)
+  base    = ".."
+  publish = ".."
+
+  # No hay paso de build — todo es HTML/CSS/JS estático
+  command = "echo 'Static site - no build needed'"
+
+# ---- Headers de seguridad y rendimiento ----
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Permitir que el hub cargue iframes del mismo origen
+    X-Frame-Options = "SAMEORIGIN"
+    # Evitar MIME sniffing
+    X-Content-Type-Options = "nosniff"
+    # Caché para assets estáticos
+    Cache-Control = "public, max-age=3600"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    # HTML no cacheado — siempre fresco
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    # Charset explícito
+    Content-Type = "text/html; charset=utf-8"
+
+[[headers]]
+  for = "/styles/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/js/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/shared/**/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# ---- Redirects ----
+# Si alguien accede a /hub o /games redireccionar al index
+[[redirects]]
+  from   = "/hub"
+  to     = "/"
+  status = 301
+
+[[redirects]]
+  from   = "/games"
+  to     = "/"
+  status = 301
+
+# Fallback: cualquier ruta no encontrada → 404 personalizado
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 404
