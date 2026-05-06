@@ -1,0 +1,192 @@
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary:    #0a0a0f;
+  --bg-card:       #111118;
+  --bg-card-hover: #1a1a28;
+  --accent-green:  #00ff88;
+  --accent-red:    #ff3355;
+  --accent-blue:   #4488ff;
+  --accent-yellow: #ffcc00;
+  --text-primary:  #f0f0f0;
+  --text-secondary:#999;
+  --border-dim:    #222233;
+  --border-bright: #00ff88;
+  --font-display:  'Courier New', Courier, monospace;
+  --font-body:     Arial, Helvetica, sans-serif;
+}
+
+/* ---- Base ---- */
+html, body {
+  width: 1280px;
+  min-height: 720px;
+  overflow-x: hidden;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: none;
+}
+
+body > * {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* ============================================================
+   GAMEPAD INDICATOR (LED simulado)
+============================================================ */
+.gamepad-indicator {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.gamepad-indicator .led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #333;
+  display: inline-block;
+}
+
+.gamepad-indicator.connected .led {
+  background: var(--accent-green);
+  -webkit-animation: led-pulse 2s ease-in-out infinite;
+  animation: led-pulse 2s ease-in-out infinite;
+}
+
+.gamepad-indicator.disconnected .led {
+  background: var(--accent-red);
+}
+ 
+.gamepad-indicator .label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+@-webkit-keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+@keyframes led-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+ 
+/* ============================================================
+   PS3 WELCOME SCREEN
+============================================================ */
+.ps3-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--bg-primary);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.ps3-welcome-inner {
+  text-align: center;
+  max-width: 600px;
+}
+
+.ps3-logo {
+  font-size: 14px;
+  letter-spacing: 6px;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.ps3-logo sup {
+  font-size: 10px;
+}
+
+.ps3-welcome h1 {
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--text-primary);
+  letter-spacing: 4px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.ps3-welcome p {
+  font-size: 20px;
+  color: #999;
+  margin-bottom: 48px;
+}
+
+.ps3-btn-hint {
+  font-size: 18px;
+  color: var(--accent-green);
+  letter-spacing: 2px;
+  border: 1px solid var(--accent-green);
+  display: inline-block;
+  padding: 12px 32px;
+  border-radius: 4px;
+  -webkit-animation: fade-pulse 1.5s ease-in-out infinite;
+  animation: fade-pulse 1.5s ease-in-out infinite;
+}
+
+@-webkit-keyframes fade-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+@keyframes fade-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.hub-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 56px;
+  background: #0d0d14;
+  border-bottom: 2px solid #00ff88;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 500;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
