@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="no-js">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1280">
-  <title>INDIE HUB - SAM'S GAME PORTAL</title>
-  <link rel="stylesheet" href="styles/hub.css" />
+  <meta id="viewport-meta" name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>INDIE HUB - PORTAL DE JUEGOS DE SAM</title>
+  <script>
+    document.documentElement.className = document.documentElement.className.replace('no-js', 'js');
+  </script>
+  <script src="js/device-detector.js"></script>
+  <link rel="stylesheet" href="styles/hub.css">
+  <link rel="stylesheet" href="styles/mobile.css">
 </head>
 <body>
   <!-- Indicador de conexión del mando (LED simulado) -->
-  <div id="gamepad-indicator" class="gamepad-indicator disconnected">
-    <span class="led"></span>
-    <span class="label">MANDO</span>
+  <div id="gamepad-indicator" class="gamepad-indicator disconnected" aria-live="polite">
+    <span class="led" aria-hidden="true"></span>
+    <span class="label">SIN MANDO</span>
   </div>
+
   <!-- Pantalla de bienvenida PS3 (solo se muestra en PS3) -->
   <div id="ps3-welcome" class="ps3-welcome hidden">
     <div class="ps3-welcome-inner">
@@ -21,48 +28,98 @@
       <div class="ps3-btn-hint">Presiona <span class="btn-x">✕</span> para continuar</div>
     </div>
   </div>
+
   <!-- Header del hub -->
   <header class="hub-header">
-    <div class="hub-logo">
+    <button id="mobile-menu-btn" class="icon-btn mobile-only" type="button" aria-label="Abrir filtros" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="hub-logo" aria-label="INDIE HUB">
       <span class="logo-indie">INDIE</span>
       <span class="logo-hub">HUB</span>
     </div>
-    <nav class="hub-nav">
-      <span class="nav-hint"><span class="btn-dpad">✜</span> Navegar</span>
-      <span class="nav-hint"><span class="btn-dpad">✕</span> Jugar</span>
-      <span class="nav-hint"><span class="btn-dpad">□</span> Info</span>
+
+    <nav class="hub-nav" aria-label="Ayuda de controles">
+      <span class="nav-hint nav-hint-gamepad"><span class="btn-dpad">✜</span> Navegar</span>
+      <span class="nav-hint nav-hint-play"><span class="btn-dpad">✕</span> Jugar</span>
+      <span class="nav-hint nav-hint-info"><span class="btn-dpad">□</span> Info</span>
     </nav>
-    <div class="hub-clock" id="hub-clock">00:00</div>
+
+    <div class="hub-actions">
+      <button id="theme-toggle" class="small-action" type="button" aria-label="Cambiar tema">TEMA</button>
+      <div class="hub-clock" id="hub-clock">00:00</div>
+    </div>
   </header>
+
+  <!-- Filtros y búsqueda. En móvil se abre como panel hamburguesa. -->
+  <aside id="filter-panel" class="filter-panel" aria-label="Filtros del catálogo">
+    <div class="filter-search-wrap">
+      <label for="game-search" class="sr-only">Buscar juegos</label>
+      <input id="game-search" class="game-search" type="search" placeholder="Buscar juegos..." autocomplete="off">
+    </div>
+
+    <div class="filter-group" aria-label="Filtrar por género">
+      <span class="filter-label">Género</span>
+      <button class="filter-chip active" type="button" data-filter-group="genre" data-filter-value="all">Todos</button>
+      <button class="filter-chip" type="button" data-filter-group="genre" data-filter-value="Runner">Runner</button>
+      <button class="filter-chip" type="button" data-filter-group="genre" data-filter-value="Acción">Acción</button>
+      <button class="filter-chip" type="button" data-filter-group="genre" data-filter-value="Shoot em up">Shooter</button>
+    </div>
+
+    <div class="filter-group" aria-label="Filtrar por estado">
+      <span class="filter-label">Estado</span>
+      <button class="filter-chip active" type="button" data-filter-group="status" data-filter-value="all">Todos</button>
+      <button class="filter-chip" type="button" data-filter-group="status" data-filter-value="available">Disponible</button>
+      <button class="filter-chip" type="button" data-filter-group="status" data-filter-value="coming">Próximo</button>
+    </div>
+
+    <div class="filter-group" aria-label="Filtrar por controles">
+      <span class="filter-label">Controles</span>
+      <button class="filter-chip active" type="button" data-filter-group="controls" data-filter-value="all">Todos</button>
+      <button class="filter-chip" type="button" data-filter-group="controls" data-filter-value="touch">Touch</button>
+      <button class="filter-chip" type="button" data-filter-group="controls" data-filter-value="gamepad">Mando</button>
+      <button class="filter-chip" type="button" data-filter-group="controls" data-filter-value="keyboard">Teclado</button>
+    </div>
+  </aside>
 
   <!-- Contenido principal: catálogo de juegos -->
   <main class="hub-main" id="hub-main">
-    <h2 class="section-title">JUEGOS DISPONIBLES</h2>
+    <div class="section-heading">
+      <div>
+        <h2 class="section-title">JUEGOS DISPONIBLES</h2>
+        <p class="section-subtitle" id="device-mode-label">Detectando dispositivo...</p>
+      </div>
+      <button id="connect-gamepad-btn" class="connect-gamepad-btn" type="button">Conectar Mando</button>
+    </div>
 
     <div class="games-grid" id="games-grid" role="grid" aria-label="Catálogo de juegos">
       <!-- Tarjeta 1: Demo Runner -->
       <div class="game-card" tabindex="0" data-game-id="demo-runner"
           data-game-title="Demo Runner"
-          data-game-desc="Un runner 2D infinito donde esquivas obstáculos y acumulas puntos. Perfecto para demostrar las capacidades del hub."
+          data-game-desc="Un runner 2D infinito donde esquivas obstáculos y acumulas puntos. Compatible con PS3, PC y controles táctiles."
           data-game-url="games/demo-runner/index.html"
           data-game-genre="Runner"
           data-game-players="1"
+          data-game-status="available"
+          data-game-controls="touch gamepad keyboard mouse"
           aria-label="Demo Runner"
           role="gridcell">
         <div class="card-icon" aria-hidden="true">
           <svg viewBox="0 0 64 64" width="64" height="64">
-            <rect x="8" y="40" width="48" height="6" fill="#00ff88" rx="2"/>
-            <rect x="28" y="20" width="8" height="20" fill="#00ff88"/>
-            <polygon points="32,8 22,24 42,24" fill="#00ff88"/>
+            <rect x="8" y="40" width="48" height="6" fill="#00ff88" rx="2"></rect>
+            <rect x="28" y="20" width="8" height="20" fill="#00ff88"></rect>
+            <polygon points="32,8 22,24 42,24" fill="#00ff88"></polygon>
           </svg>
         </div>
         <div class="card-body">
           <h3 class="card-title">DEMO RUNNER</h3>
-          <p class="card-genre">Runner • 1 Jugador</p>
+          <p class="card-genre">Runner · 1 Jugador</p>
           <p class="card-desc">Runner 2D infinito. Esquiva obstáculos y supera tu récord.</p>
           <div class="card-controls">
             <span class="ctrl-tag"><span class="btn-x">✕</span> Saltar</span>
-            <span class="ctrl-tag"><span class="btn-sq">□</span> Doble Salto</span>
+            <span class="ctrl-tag"><span class="btn-sq">□</span> Doble salto</span>
+            <span class="ctrl-tag touch-tag">Touch</span>
           </div>
         </div>
         <div class="card-status status-available">DISPONIBLE</div>
@@ -72,29 +129,67 @@
       <!-- Tarjeta 2: Zombie Smasher -->
       <div class="game-card" tabindex="0" data-game-id="zombie-smasher"
           data-game-title="Zombie Smasher"
-          data-game-desc="Defiende tu base de oleadas de zombies con armas y habilidades especiales. ¿Hasta qué oleada llegarás?"
+          data-game-desc="Defiende tu base de oleadas de zombies con joystick virtual, teclado o mando físico."
           data-game-url="games/zombie-smasher/index.html"
           data-game-genre="Acción"
           data-game-players="1"
+          data-game-status="available"
+          data-game-controls="touch gamepad keyboard mouse"
           aria-label="Zombie Smasher"
           role="gridcell">
         <div class="card-icon" aria-hidden="true">
           <svg viewBox="0 0 64 64" width="64" height="64">
-            <circle cx="32" cy="20" r="12" fill="#ff4444"/>
-            <rect x="20" y="32" width="24" height="20" fill="#cc2222" rx="3"/>
-            <line x1="16" y1="40" x2="24" y2="40" stroke="#ff4444" stroke-width="4"/>
-            <line x1="40" y1="40" x2="48" y2="40" stroke="#ff4444" stroke-width="4"/>
-            <circle cx="26" cy="18" r="3" fill="#ffff00"/>
-            <circle cx="38" cy="18" r="3" fill="#ffff00"/>
+            <circle cx="32" cy="20" r="12" fill="#ff4444"></circle>
+            <rect x="20" y="32" width="24" height="20" fill="#cc2222" rx="3"></rect>
+            <line x1="16" y1="40" x2="24" y2="40" stroke="#ff4444" stroke-width="4"></line>
+            <line x1="40" y1="40" x2="48" y2="40" stroke="#ff4444" stroke-width="4"></line>
+            <circle cx="26" cy="18" r="3" fill="#ffff00"></circle>
+            <circle cx="38" cy="18" r="3" fill="#ffff00"></circle>
           </svg>
         </div>
         <div class="card-body">
           <h3 class="card-title">ZOMBIE SMASHER</h3>
-          <p class="card-genre">Acción • 1 Jugador</p>
+          <p class="card-genre">Acción · 1 Jugador</p>
           <p class="card-desc">Oleadas de zombies. Defiende tu base hasta el último segundo.</p>
           <div class="card-controls">
             <span class="ctrl-tag"><span class="btn-stick">L</span> Mover</span>
             <span class="ctrl-tag"><span class="btn-x">✕</span> Atacar</span>
+            <span class="ctrl-tag touch-tag">Touch</span>
+          </div>
+        </div>
+        <div class="card-status status-available">DISPONIBLE</div>
+        <div class="card-focus-ring" aria-hidden="true"></div>
+      </div>
+
+      <!-- Tarjeta 3: Space Shooter -->
+      <div class="game-card" tabindex="0" data-game-id="space-shooter"
+          data-game-title="Space Shooter"
+          data-game-desc="Nave espacial vs oleadas de enemigos alienígenas. Colecciona power-ups y desbloquea armas devastadoras."
+          data-game-url="games/space-shooter/index.html"
+          data-game-genre="Shoot em up"
+          data-game-players="1"
+          data-game-status="coming"
+          data-game-controls="gamepad keyboard"
+          aria-label="Space Shooter"
+          role="gridcell">
+        <div class="card-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="64" height="64">
+            <polygon points="32,4 22,52 32,44 42,52" fill="#4488ff"></polygon>
+            <polygon points="32,4 22,52 32,44 42,52" fill="none" stroke="#88ccff" stroke-width="1"></polygon>
+            <circle cx="32" cy="30" r="4" fill="#88ccff"></circle>
+            <line x1="10" y1="58" x2="18" y2="42" stroke="#ffaa00" stroke-width="3"></line>
+            <line x1="54" y1="58" x2="46" y2="42" stroke="#ffaa00" stroke-width="3"></line>
+            <circle cx="20" cy="16" r="3" fill="#ff4444"></circle>
+            <circle cx="44" cy="24" r="2" fill="#ff4444"></circle>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">SPACE SHOOTER</h3>
+          <p class="card-genre">Shoot em up · 1 Jugador</p>
+          <p class="card-desc">Naves alienígenas, power-ups y explosiones épicas en el espacio.</p>
+          <div class="card-controls">
+            <span class="ctrl-tag"><span class="btn-stick">L</span> Mover</span>
+            <span class="ctrl-tag"><span class="btn-x">✕</span> Disparar</span>
           </div>
         </div>
         <div class="card-status status-coming">PRÓXIMO</div>
@@ -103,55 +198,80 @@
 
       <!-- Tarjeta N: Placeholder para nuevo juego -->
       <div class="game-card game-card--add" tabindex="0" data-game-id="add-game"
+          data-game-status="info"
           aria-label="Añadir nuevo juego"
           role="gridcell">
         <div class="card-icon" aria-hidden="true">
           <svg viewBox="0 0 64 64" width="64" height="64">
-            <line x1="32" y1="10" x2="32" y2="54" stroke="#555" stroke-width="5" stroke-linecap="round"/>
-            <line x1="10" y1="32" x2="54" y2="32" stroke="#555" stroke-width="5" stroke-linecap="round"/>
+            <line x1="32" y1="10" x2="32" y2="54" stroke="#555" stroke-width="5" stroke-linecap="round"></line>
+            <line x1="10" y1="32" x2="54" y2="32" stroke="#555" stroke-width="5" stroke-linecap="round"></line>
           </svg>
         </div>
         <div class="card-body">
-          <h3 class="card-title" style="color:#888;">NUEVO JUEGO</h3>
-          <p class="card-desc" style="color:#666;">Copia tu juego en /games/tu-juego/ y actualiza hub-main.js</p>
+          <h3 class="card-title add-title">NUEVO JUEGO</h3>
+          <p class="card-desc add-desc">Copia tu juego en /games/tu-juego/ y actualiza hub-main.js.</p>
         </div>
         <div class="card-focus-ring" aria-hidden="true"></div>
       </div>
-
     </div><!-- /games-grid -->
+
+    <div id="empty-state" class="empty-state hidden">
+      No hay juegos que coincidan con la búsqueda.
+    </div>
   </main>
 
-  <!-- Panel de información del juego (activado con □) -->
+  <!-- Navegación inferior móvil -->
+  <nav class="mobile-bottom-nav mobile-only" aria-label="Acciones móviles">
+    <button id="bottom-search-btn" type="button">Buscar</button>
+    <button id="bottom-filter-btn" type="button">Filtros</button>
+    <button id="bottom-gamepad-btn" type="button">Mando</button>
+  </nav>
+
+  <!-- Panel de información del juego (activado con □ o tap largo) -->
   <div id="game-info-panel" class="game-info-panel hidden" role="dialog" aria-modal="true" aria-label="Información del juego">
     <div class="info-panel-inner">
       <h2 id="info-title" class="info-title"></h2>
       <p id="info-genre" class="info-genre"></p>
       <p id="info-desc" class="info-desc"></p>
       <div class="info-actions">
-        <button id="info-play-btn" class="btn-primary"><span class="btn-x">✕</span> JUGAR</button>
-        <button id="info-close-btn" class="btn-secondary"><span class="btn-o">○</span> CERRAR</button>
+        <button id="info-play-btn" class="btn-primary" type="button"><span class="btn-x">✕</span> JUGAR</button>
+        <button id="info-close-btn" class="btn-secondary" type="button"><span class="btn-o">○</span> CERRAR</button>
       </div>
     </div>
   </div>
 
+  <!-- Contenedor responsive para juegos en iframe -->
+  <section id="game-container" class="game-container hidden" aria-label="Juego en ejecución">
+    <div class="game-topbar">
+      <button id="game-close-btn" class="game-close-btn" type="button"><span class="btn-o">○</span> HUB</button>
+      <div id="game-topbar-title" class="game-topbar-title">JUEGO</div>
+      <button id="game-fullscreen-btn" class="game-fullscreen-btn" type="button">⛶ PANTALLA</button>
+    </div>
+    <iframe id="game-iframe" class="game-iframe" title="Juego cargado" src="about:blank"
+      sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-forms"
+      allow="gamepad; fullscreen"></iframe>
+  </section>
+
   <!-- Footer -->
   <footer class="hub-footer">
-    <span>INDIE HUB v1.0 por Mr. Sam 🖖 — Optimizado para PlayStation®3</span>
+    <span>&copy; 2026 INDIE HUB v1.0 por Mr. Sam 🖖</span>
     <span id="fps-counter" class="fps-counter">30 FPS</span>
   </footer>
 
   <!-- Overlay de carga -->
-  <div id="loading-overlay" class="loading-overlay hidden">
-    <div class="loading-spinner"></div>
+  <div id="loading-overlay" class="loading-overlay hidden" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
     <p class="loading-text">CARGANDO JUEGO...</p>
   </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <script src="shared/core/ps3-gamepad-api.js"></script>
   <script src="shared/core/performance-optimizer.js"></script>
   <script src="shared/utils/math-helper.js"></script>
+  <script src="shared/utils/storage.js"></script>
   <script src="js/gamepad-nav.js"></script>
-  <script src="js/gamepad-nav.js"></script>
-  <script src="js/gamepad-launcher.js"></script>
+  <script src="js/game-launcher.js"></script>
   <script src="js/hub-main.js"></script>
 </body>
 </html>

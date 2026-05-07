@@ -1,0 +1,273 @@
+@media (max-width: 639px), (hover: none) and (pointer: coarse) {
+  .mobile-only {
+    display: block;
+  }
+
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior: none;
+  }
+
+  .hub-header {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .hub-logo {
+    font-size: 20px;
+    letter-spacing: 3px;
+  }
+
+  .hub-nav,
+  .hub-clock {
+    display: none;
+  }
+
+  .gamepad-indicator {
+    top: 70px;
+    right: 12px;
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .filter-panel {
+    top: 64px;
+    bottom: 56px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateX(-104%);
+    transform: translateX(-104%);
+    -webkit-transition: -webkit-transform .18s ease-out;
+    transition: transform .18s ease-out;
+    border-right: 1px solid #222233;
+    max-width: 360px;
+  }
+
+  .filter-panel.open {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+
+  .filter-panel .filter-group {
+    display: block;
+    margin: 12px 0 18px;
+  }
+
+  .filter-chip {
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .hub-main {
+    padding: 88px 12px 86px;
+  }
+
+  .section-heading {
+    display: block;
+    margin-bottom: 12px;
+    padding-right: 96px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .section-subtitle {
+    font-size: 12px;
+  }
+
+  .connect-gamepad-btn {
+    position: fixed;
+    right: 12px;
+    bottom: 68px;
+    z-index: 700;
+    min-height: 48px;
+    border-radius: 999px;
+    padding: 0 14px;
+    background: #001a0d;
+  }
+
+  .games-grid {
+    margin: -6px;
+  }
+
+  .game-card {
+    min-height: 128px;
+    margin: 6px;
+    padding: 14px;
+    border-width: 1px;
+  }
+
+  .card-icon {
+    width: 58px;
+    height: 58px;
+    margin-right: 12px;
+  }
+
+  .card-icon svg {
+    width: 58px;
+    height: 58px;
+  }
+
+  .card-title {
+    font-size: 17px;
+    letter-spacing: 1px;
+  }
+
+  .card-genre,
+  .card-desc {
+    font-size: 13px;
+  }
+
+  .card-body {
+    padding-right: 74px;
+  }
+
+  .card-status {
+    top: 10px;
+    right: 10px;
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+
+  .ctrl-tag {
+    font-size: 14px;
+    padding: 8px 12px;
+    min-height: 36px;
+  }
+
+  .game-info-panel {
+    padding: 14px;
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+  }
+
+  .info-panel-inner {
+    max-width: none;
+    border-radius: 12px 12px 0 0;
+    padding: 22px;
+  }
+
+  .info-title {
+    font-size: 24px;
+  }
+
+  .info-actions {
+    display: block;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    margin: 0 0 10px 0;
+    min-height: 52px;
+  }
+
+  .game-topbar {
+    height: 48px;
+    min-height: 48px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .game-topbar-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+
+  .game-close-btn,
+  .game-fullscreen-btn {
+    font-size: 11px;
+    padding: 0 8px;
+  }
+
+  .game-container.fullscreen-active .game-topbar {
+    opacity: .85;
+  }
+
+  .hub-footer {
+    display: none;
+  }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 56px;
+    z-index: 650;
+    background: #0d0d14;
+    border-top: 1px solid #222233;
+    padding-bottom: env(safe-area-inset-bottom);
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+  }
+
+  .mobile-bottom-nav button {
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    flex: 1;
+    background: transparent;
+    color: #dddddd;
+    border: 0;
+    border-right: 1px solid #222233;
+    font-size: 13px;
+  }
+
+  .mobile-bottom-nav button:last-child {
+    border-right: 0;
+  }
+
+  .toast-container {
+    bottom: 126px;
+  }
+}
+
+/* Tablets: modo híbrido touch + gamepad opcional. */
+@media (min-width: 640px) and (max-width: 959px) {
+  .device-touch .mobile-only {
+    display: block;
+  }
+
+  .device-touch .hub-main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .device-touch .game-card {
+    min-height: 168px;
+  }
+
+  .device-touch .ctrl-tag {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .device-touch .connect-gamepad-btn {
+    min-height: 48px;
+  }
+}
+
+/* Preferencia de movimiento reducido: útil para batería y accesibilidad. */
+@media (prefers-reduced-motion: reduce) {
+  .game-card,
+  .filter-panel,
+  .toast,
+  .loading-spinner,
+  .ps3-btn-hint,
+  .gamepad-indicator.connected .led {
+    -webkit-animation: none !important;
+    animation: none !important;
+    -webkit-transition: none !important;
+    transition: none !important;
+  }
+}
+
+html.device-ps3 .mobile-bottom-nav,
+html.device-ps3 .mobile-only {
+  display: none !important;
+}
