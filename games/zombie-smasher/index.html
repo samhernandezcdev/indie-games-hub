@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280, initial-scale=1.0">
+<title>ZOMBIE SMASHER - PS3 Edition</title>
+<style>
+  /* ============================================================
+     ZOMBIE SMASHER PS3 - Estilos globales
+     Fuente grande, alto contraste, optimizado para TV 1280x720
+  ============================================================ */
+  @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+  }
+
+  #gameWrapper {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  /* Canvas principal del juego */
+  #gameCanvas {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px;
+    height: 720px;
+  }
+
+  /* HUD superpuesto al canvas */
+  #hud {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px;
+    height: 720px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* --- Barra superior HUD --- */
+  #hudTop {
+    position: absolute;
+    top: 16px; left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+  }
+
+  .hudPanel {
+    background: rgba(0,0,0,0.75);
+    border: 2px solid #33ff55;
+    border-radius: 8px;
+    padding: 8px 20px;
+    color: #fff;
+    text-align: center;
+  }
+
+  .hudLabel {
+    font-size: 14px;
+    color: #33ff55;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .hudValue {
+    font-family: 'Creepster', cursive;
+    font-size: 36px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  /* Barra de vida */
+  #lifeBar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .heart {
+    font-size: 36px;
+    filter: drop-shadow(0 0 6px #ff3333);
+    transition: opacity 0.3s;
+  }
+
+  .heart.lost { opacity: 0.2; filter: none; }
+
+  /* Indicador de gamepad */
+  #gamepadStatus {
+    position: absolute;
+    bottom: 16px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid #555;
+    border-radius: 8px;
+    padding: 6px 14px;
+    color: #888;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  #gamepadStatus.connected {
+    border-color: #33ff55;
+    color: #33ff55;
+  }
+
+  #gamepadDot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+  }
+
+  #gamepadStatus.connected #gamepadDot { background: #33ff55; }
+
+  /* --- Leyenda de controles (botones PS) --- */
+  #controls {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    display: flex;
+    gap: 16px;
+  }
+
+  .ctrlBtn {
+    background: rgba(0,0,0,0.75);
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+    color: #ccc;
+  }
+
+  .psBtn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .ps-cross  { background: #4488ff; color: #fff; }
+  .ps-circle { background: #ff4444; color: #fff; }
+  .ps-square { background: #ff88ff; color: #fff; }
+  .ps-tri    { background: #44ffaa; color: #000; }
+
+  /* Power-up indicator */
+  #powerupHud {
+    position: absolute;
+    top: 90px;
+    left: 30px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 6px 14px;
+    color: #fff;
+    font-size: 20px;
+    opacity: 0;
+    transition: opacity 0.3s, border-color 0.3s;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  /* Wave indicator */
+  #waveAnnounce {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Creepster', cursive;
+    font-size: 80px;
+    color: #ff3333;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #880000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  /* Pantalla de inicio */
+  #screenStart, #screenGameOver, #screenPause {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1280px; height: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    background: rgba(0,0,0,0.92);
+  }
+
+  #screenGameOver, #screenPause { display: none; }
+
+  .screenTitle {
+    font-family: 'Creepster', cursive;
+    font-size: 110px;
+    color: #ff3333;
+    text-shadow: 0 0 30px #ff0000, 4px 4px 0 #660000;
+    line-height: 1;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .screenSub {
+    font-family: 'Creepster', cursive;
+    font-size: 42px;
+    color: #33ff55;
+    text-shadow: 0 0 15px #00aa33;
+    margin-bottom: 40px;
+  }
+
+  .screenPrompt {
+    font-size: 32px;
+    color: #fff;
+    letter-spacing: 4px;
+    animation: blink 1s infinite;
+    text-align: center;
+  }
+
+  .screenInfo {
+    font-size: 22px;
+    color: #aaa;
+    margin-top: 20px;
+    text-align: center;
+    line-height: 1.8;
+  }
+
+  .goScore {
+    font-family: 'Creepster', cursive;
+    font-size: 56px;
+    color: #ffcc00;
+    text-shadow: 0 0 20px #ffaa00;
+    margin: 10px 0;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Escala automática para pantallas que no sean 1280x720 */
+  @media (max-width: 1300px) {
+    #gameWrapper {
+      transform-origin: top left;
+      transform: scale(calc(100vw / 1280));
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="gameWrapper">
+  <!-- Canvas principal -->
+  <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="hudTop">
+      <!-- Puntuación -->
+      <div class="hudPanel">
+        <div class="hudLabel">Puntos</div>
+        <div class="hudValue" id="hudScore">0</div>
+      </div>
+      <!-- Vidas -->
+      <div class="hudPanel" style="border-color:#ff3333;">
+        <div class="hudLabel">Vidas</div>
+        <div id="lifeBar">
+          <span class="heart" id="h1">❤️</span>
+          <span class="heart" id="h2">❤️</span>
+          <span class="heart" id="h3">❤️</span>
+        </div>
+      </div>
+      <!-- Oleada -->
+      <div class="hudPanel" style="border-color:#ffcc00;">
+        <div class="hudLabel">Oleada</div>
+        <div class="hudValue" id="hudWave">1</div>
+      </div>
+      <!-- Zombies eliminados -->
+      <div class="hudPanel">
+        <div class="hudLabel">Kills</div>
+        <div class="hudValue" id="hudKills">0</div>
+      </div>
+    </div>
+
+    <!-- Power-up activo -->
+    <div id="powerupHud"></div>
+
+    <!-- Anuncio de oleada -->
+    <div id="waveAnnounce">¡OLEADA 1!</div>
+
+    <!-- Controles (parte inferior izquierda) -->
+    <div id="controls">
+      <div class="ctrlBtn">
+        <div class="psBtn ps-cross">✕</div>
+        <span>Golpear</span>
+      </div>
+      <div class="ctrlBtn">
+        <div class="psBtn ps-circle">○</div>
+        <span>Especial</span>
+      </div>
+      <div class="ctrlBtn">
+        <div class="psBtn ps-square">□</div>
+        <span>Pausa</span>
+      </div>
+      <div class="ctrlBtn">
+        <div class="psBtn ps-tri">△</div>
+        <span>Arma</span>
+      </div>
+    </div>
+
+    <!-- Estado del gamepad -->
+    <div id="gamepadStatus">
+      <div id="gamepadDot"></div>
+      <span id="gamepadText">Sin mando</span>
+    </div>
+  </div>
+
+  <!-- Pantalla de Inicio -->
+  <div id="screenStart">
+    <div class="screenTitle">ZOMBIE</div>
+    <div class="screenTitle" style="color:#33ff55; text-shadow:0 0 30px #00ff55, 4px 4px 0 #004400; margin-top:-20px;">SMASHER</div>
+    <div class="screenSub">PS3 Edition</div>
+    <div class="screenPrompt">PRESIONA ✕ O ESPACIO PARA INICIAR</div>
+    <div class="screenInfo">
+      Mover: Stick izquierdo / WASD / Flechas<br>
+      Golpear: ✕ / Espacio &nbsp;|&nbsp; Especial: ○ / E<br>
+      Cambiar arma: △ / Q &nbsp;|&nbsp; Pausa: □ / Esc
+    </div>
+  </div>
+
+  <!-- Pantalla Game Over -->
+  <div id="screenGameOver">
+    <div class="screenTitle" style="font-size:90px;">GAME OVER</div>
+    <div class="screenSub">¡Los zombies ganaron!</div>
+    <div class="goScore" id="goScore">0 puntos</div>
+    <div class="goScore" style="font-size:32px; color:#aaa;" id="goWave">Oleada 1 · 0 kills</div>
+    <div class="screenPrompt" style="margin-top:30px;">PRESIONA ✕ O ESPACIO PARA REINTENTAR</div>
+  </div>
+
+  <!-- Pantalla de Pausa -->
+  <div id="screenPause">
+    <div class="screenTitle" style="font-size:90px; color:#ffcc00; text-shadow:0 0 20px #ffaa00;">PAUSA</div>
+    <div class="screenPrompt">PRESIONA □ O ESC PARA CONTINUAR</div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  ZOMBIE SMASHER PS3 - Engine principal
+//  Vanilla JS + Canvas2D | Sin frameworks | Optimizado 30-60 fps
+// ================================================================
+
+// --- Referencias DOM ---
+const canvas   = document.getElementById('gameCanvas');
+const ctx      = canvas.getContext('2d');
+const W = 1280, H = 720;
+
+const hudScore   = document.getElementById('hudScore');
+const hudWave    = document.getElementById('hudWave');
+const hudKills   = document.getElementById('hudKills');
+const powerupHud = document.getElementById('powerupHud');
+const waveAnnounce = document.getElementById('waveAnnounce');
+const screenStart    = document.getElementById('screenStart');
+const screenGameOver = document.getElementById('screenGameOver');
+const screenPause    = document.getElementById('screenPause');
+const goScore        = document.getElementById('goScore');
+const goWave         = document.getElementById('goWave');
+const gpStatus       = document.getElementById('gamepadStatus');
+const gpText         = document.getElementById('gamepadText');
+const hearts         = [document.getElementById('h1'), document.getElementById('h2'), document.getElementById('h3')];
+
+// ================================================================
+//  ESTADO DEL JUEGO
+// ================================================================
+const STATE = { START: 0, PLAYING: 1, PAUSED: 2, GAME_OVER: 3 };
+let gameState = STATE.START;
+
+const game = {
+  score: 0,
+  wave: 1,
+  kills: 0,
+  lives: 3,
+  frameCount: 0,
+  lastTime: 0,
+  deltaTime: 0,
+  // Control de oleada
+  zombiesThisWave: 0,
+  zombiesSpawned: 0,
+  waveComplete: false,
+  waveTimer: 0,
+  spawnInterval: 90, // frames entre spawns
+  spawnTimer: 0,
+  // Power-up activo
+  activePowerup: null,
+  powerupTimer: 0,
+  // Invulnerabilidad al recibir daño
+  playerInvulnerable: 0,
+};
+
+// ================================================================
+//  JUGADOR
+// ================================================================
+const player = {
+  x: W / 2, y: H / 2,
+  radius: 22,
+  speed: 4.5,
+  angle: 0,   // dirección a la que mira
+  // Armas: 0=Puños, 1=Mazo, 2=Motosierra
+  weapon: 0,
+  weapons: ['Puños','Mazo','Motosierra'],
+  weaponColors: ['#ffcc44','#aa6622','#ff5522'],
+  // Ataque
+  attacking: false,
+  attackTimer: 0,
+  attackCooldown: 0,
+  attackRange: 90,
+  attackAngle: Math.PI * 0.7,
+  attackDamage: 1,
+  // Especial (área)
+  specialTimer: 0,
+  specialCooldown: 0,
+  specialActive: false,
+  specialDuration: 0,
+  // Visual
+  color: '#4488ff',
+  trail: [],
+};
+
+// ================================================================
+//  ZOMBIES
+// ================================================================
+let zombies = [];
+
+function createZombie(waveNum) {
+  // Spawn en el borde
+  const side = Math.floor(Math.random() * 4);
+  let x, y;
+  if (side === 0) { x = Math.random() * W; y = -30; }
+  else if (side === 1) { x = W + 30; y = Math.random() * H; }
+  else if (side === 2) { x = Math.random() * W; y = H + 30; }
+  else { x = -30; y = Math.random() * H; }
+
+  // Tipo de zombie según oleada
+  const typeRoll = Math.random();
+  let type = 'normal';
+  if (waveNum >= 3 && typeRoll < 0.15) type = 'fat';
+  if (waveNum >= 5 && typeRoll < 0.08) type = 'runner';
+  if (waveNum >= 7 && typeRoll < 0.05) type = 'boss';
+
+  const speedBonus = (waveNum - 1) * 0.12;
+
+  const configs = {
+    normal: { radius: 18, hp: 1, speed: 1.1 + speedBonus, color: '#55cc44', score: 10, eyeSize: 5 },
+    fat:    { radius: 28, hp: 3, speed: 0.7 + speedBonus, color: '#77aa22', score: 30, eyeSize: 6 },
+    runner: { radius: 14, hp: 1, speed: 2.2 + speedBonus, color: '#99ff44', score: 20, eyeSize: 4 },
+    boss:   { radius: 40, hp: 8, speed: 0.5 + speedBonus, color: '#44aa22', score: 100, eyeSize: 9 },
+  };
+
+  const cfg = configs[type];
+  return {
+    x, y,
+    type,
+    radius: cfg.radius,
+    hp: cfg.hp,
+    maxHp: cfg.hp,
+    speed: cfg.speed,
+    color: cfg.color,
+    score: cfg.score,
+    eyeSize: cfg.eyeSize,
+    angle: 0,
+    wobble: Math.random() * Math.PI * 2,
+    // Estado visual
+    dying: false,
+    dyingTimer: 0,
+    hitFlash: 0,
+    // Power-up drop
+    dropChance: type === 'boss' ? 1 : type === 'fat' ? 0.3 : 0.08,
+  };
+}
+
+// ================================================================
+//  PARTÍCULAS
+// ================================================================
+let particles = [];
+
+function spawnParticles(x, y, color, count, speed) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const spd = speed * (0.5 + Math.random());
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd,
+      radius: 3 + Math.random() * 5,
+      color,
+      life: 1,
+      decay: 0.04 + Math.random() * 0.05,
+    });
+  }
+}
+
+// ================================================================
+//  POWER-UPS (drops en el suelo)
+// ================================================================
+let powerups = [];
+const POWERUP_TYPES = [
+  { id: 'speed',  label: '⚡ VELOCIDAD',  color: '#ffff44', border: '#ffcc00', duration: 400 },
+  { id: 'double', label: '⚔️ DOBLE DAÑO', color: '#ff8844', border: '#ff4400', duration: 350 },
+  { id: 'shield', label: '🛡️ ESCUDO',     color: '#44aaff', border: '#0055ff', duration: 300 },
+];
+
+function spawnPowerup(x, y) {
+  const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+  powerups.push({ x, y, type, radius: 16, life: 600, bobOffset: Math.random() * Math.PI * 2 });
+}
+
+function activatePowerup(type) {
+  game.activePowerup = type.id;
+  game.powerupTimer = type.duration;
+  powerupHud.style.opacity = '1';
+  powerupHud.style.borderColor = type.border;
+  powerupHud.style.color = type.color;
+  powerupHud.textContent = type.label;
+}
+
+function clearPowerup() {
+  game.activePowerup = null;
+  game.powerupTimer = 0;
+  powerupHud.style.opacity = '0';
+}
+
+// ================================================================
+//  ENTRADAS (Teclado + Gamepad)
+// ================================================================
+const keys = {};
+const prevKeys = {};
+let gamepadIndex = -1;
+let gpConnected = false;
+
+// Gamepad polling manual (necesario para PS3)
+function pollGamepad() {
+  const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (let i = 0; i < gamepads.length; i++) {
+    if (gamepads[i]) {
+      gamepadIndex = i;
+      if (!gpConnected) {
+        gpConnected = true;
+        gpStatus.classList.add('connected');
+        gpText.textContent = 'Mando conectado';
+      }
+      return gamepads[i];
+    }
+  }
+  if (gpConnected) {
+    gpConnected = false;
+    gpStatus.classList.remove('connected');
+    gpText.textContent = 'Sin mando';
+  }
+  return null;
+}
+
+// Eventos de conexión/desconexión
+window.addEventListener('gamepadconnected', (e) => {
+  gamepadIndex = e.gamepad.index;
+  gpConnected = true;
+  gpStatus.classList.add('connected');
+  gpText.textContent = 'Mando conectado';
+});
+window.addEventListener('gamepaddisconnected', () => {
+  gamepadIndex = -1;
+  gpConnected = false;
+  gpStatus.classList.remove('connected');
+  gpText.textContent = 'Sin mando';
+});
+
+// Teclado
+document.addEventListener('keydown', e => {
+  if (!keys[e.code]) prevKeys[e.code] = false;
+  keys[e.code] = true;
+  e.preventDefault();
+});
+document.addEventListener('keyup', e => {
+  keys[e.code] = false;
+  prevKeys[e.code] = false;
+});
+
+function keyPressed(code) {
+  if (keys[code] && !prevKeys[code]) {
+    prevKeys[code] = true;
+    return true;
+  }
+  return false;
+}
+
+// --- Estado de botones del gamepad (para detectar "just pressed") ---
+const gpPrev = { buttons: [] };
+
+function gpPressed(gp, btnIndex) {
+  const cur = gp.buttons[btnIndex]?.pressed;
+  const prev = gpPrev.buttons[btnIndex];
+  gpPrev.buttons[btnIndex] = cur;
+  return cur && !prev;
+}
+
+// ================================================================
+//  LÓGICA DE JUEGO
+// ================================================================
+
+function initGame() {
+  game.score = 0;
+  game.wave = 1;
+  game.kills = 0;
+  game.lives = 3;
+  game.frameCount = 0;
+  game.activePowerup = null;
+  game.powerupTimer = 0;
+  game.playerInvulnerable = 0;
+  game.waveComplete = false;
+  game.waveTimer = 0;
+  game.spawnTimer = 0;
+  game.zombiesSpawned = 0;
+
+  player.x = W / 2;
+  player.y = H / 2;
+  player.angle = 0;
+  player.attacking = false;
+  player.attackTimer = 0;
+  player.attackCooldown = 0;
+  player.specialTimer = 0;
+  player.specialCooldown = 0;
+  player.specialActive = false;
+  player.specialDuration = 0;
+  player.weapon = 0;
+  player.attackDamage = 1;
+  player.trail = [];
+
+  zombies = [];
+  particles = [];
+  powerups = [];
+
+  updateHUD();
+  updateHearts();
+  beginWave(1);
+}
+
+function beginWave(num) {
+  game.wave = num;
+  game.zombiesThisWave = 5 + num * 3;
+  game.zombiesSpawned = 0;
+  game.waveComplete = false;
+  game.spawnInterval = Math.max(30, 90 - num * 5);
+  game.spawnTimer = 30; // pequeño delay inicial
+
+  // Anunciar oleada
+  waveAnnounce.textContent = '¡OLEADA ' + num + '!';
+  waveAnnounce.style.opacity = '1';
+  setTimeout(() => { waveAnnounce.style.opacity = '0'; }, 1800);
+}
+
+function updateHUD() {
+  hudScore.textContent = game.score;
+  hudWave.textContent = game.wave;
+  hudKills.textContent = game.kills;
+}
+
+function updateHearts() {
+  hearts.forEach((h, i) => {
+    h.classList.toggle('lost', i >= game.lives);
+  });
+}
+
+// --- Daño al jugador ---
+function damagePlayer() {
+  if (game.playerInvulnerable > 0) return;
+  if (game.activePowerup === 'shield') {
+    clearPowerup();
+    game.playerInvulnerable = 90;
+    spawnParticles(player.x, player.y, '#44aaff', 20, 4);
+    return;
+  }
+  game.lives--;
+  game.playerInvulnerable = 120;
+  spawnParticles(player.x, player.y, '#ff4444', 15, 3);
+  updateHearts();
+  if (game.lives <= 0) {
+    triggerGameOver();
+  }
+}
+
+function triggerGameOver() {
+  gameState = STATE.GAME_OVER;
+  goScore.textContent = game.score + ' puntos';
+  goWave.textContent = 'Oleada ' + game.wave + ' · ' + game.kills + ' kills';
+  screenGameOver.style.display = 'flex';
+}
+
+// ================================================================
+//  UPDATE
+// ================================================================
+function update(dt) {
+  if (gameState !== STATE.PLAYING) return;
+
+  game.frameCount++;
+  const gp = pollGamepad();
+
+  // --- Inicializar estado botones gamepad ---
+  if (gp) {
+    while (gpPrev.buttons.length < gp.buttons.length) gpPrev.buttons.push(false);
+  }
+
+  // ---- Movimiento del jugador ----
+  let mx = 0, my = 0;
+  const spd = game.activePowerup === 'speed' ? player.speed * 1.7 : player.speed;
+
+  // Teclado WASD / Flechas
+  if (keys['KeyW'] || keys['ArrowUp'])    my -= 1;
+  if (keys['KeyS'] || keys['ArrowDown'])  my += 1;
+  if (keys['KeyA'] || keys['ArrowLeft'])  mx -= 1;
+  if (keys['KeyD'] || keys['ArrowRight']) mx += 1;
+
+  // Gamepad Left Stick (ejes 0 y 1)
+  if (gp) {
+    const ax = gp.axes[0] || 0;
+    const ay = gp.axes[1] || 0;
+    if (Math.abs(ax) > 0.15) mx += ax;
+    if (Math.abs(ay) > 0.15) my += ay;
+  }
+
+  // Normalizar diagonal
+  const mag = Math.sqrt(mx * mx + my * my);
+  if (mag > 0) {
+    mx = mx / mag; my = my / mag;
+    player.x = Math.max(player.radius, Math.min(W - player.radius, player.x + mx * spd));
+    player.y = Math.max(player.radius, Math.min(H - player.radius, player.y + my * spd));
+    player.angle = Math.atan2(my, mx);
+    // Trail
+    player.trail.push({ x: player.x, y: player.y, life: 1 });
+    if (player.trail.length > 8) player.trail.shift();
+  } else {
+    player.trail = [];
+  }
+  player.trail.forEach(t => { t.life -= 0.15; });
+  player.trail = player.trail.filter(t => t.life > 0);
+
+  // ---- Cooldowns ----
+  if (player.attackCooldown > 0) player.attackCooldown--;
+  if (player.attackTimer > 0) {
+    player.attackTimer--;
+    if (player.attackTimer <= 0) player.attacking = false;
+  }
+  if (player.specialCooldown > 0) player.specialCooldown--;
+  if (player.specialDuration > 0) {
+    player.specialDuration--;
+    if (player.specialDuration <= 0) player.specialActive = false;
+  }
+  if (game.playerInvulnerable > 0) game.playerInvulnerable--;
+
+  // ---- Botón Golpear (✕ / Espacio) ----
+  const doAttack = keyPressed('Space') || keyPressed('KeyZ') ||
+                   (gp && gpPressed(gp, 0)); // Cross = button 0
+  if (doAttack && player.attackCooldown <= 0) {
+    player.attacking = true;
+    player.attackTimer = 18;
+    const cd = player.weapon === 0 ? 22 : player.weapon === 1 ? 35 : 28;
+    player.attackCooldown = cd;
+    checkAttackHits();
+  }
+
+  // ---- Especial (○ / E) ----
+  const doSpecial = keyPressed('KeyE') || keyPressed('KeyX') ||
+                    (gp && gpPressed(gp, 1)); // Circle = button 1
+  if (doSpecial && player.specialCooldown <= 0) {
+    player.specialActive = true;
+    player.specialDuration = 25;
+    player.specialCooldown = 180;
+    specialAttack();
+  }
+
+  // ---- Cambiar arma (△ / Q) ----
+  const doWeapon = keyPressed('KeyQ') || keyPressed('KeyV') ||
+                   (gp && gpPressed(gp, 3)); // Triangle = button 3
+  if (doWeapon) {
+    player.weapon = (player.weapon + 1) % player.weapons.length;
+    player.attackDamage = player.weapon === 0 ? 1 : player.weapon === 1 ? 2 : 3;
+    spawnParticles(player.x, player.y - 30, player.weaponColors[player.weapon], 8, 2);
+  }
+
+  // ---- Pausa (□ / Esc) ----
+  const doPause = keyPressed('Escape') || keyPressed('KeyP') ||
+                  (gp && gpPressed(gp, 2)); // Square = button 2
+  if (doPause) {
+    gameState = STATE.PAUSED;
+    screenPause.style.display = 'flex';
+    return;
+  }
+
+  // ---- Power-up timer ----
+  if (game.powerupTimer > 0) {
+    game.powerupTimer--;
+    if (game.powerupTimer <= 0) clearPowerup();
+  }
+
+  // ---- Spawn zombies ----
+  if (!game.waveComplete) {
+    game.spawnTimer--;
+    if (game.spawnTimer <= 0 && game.zombiesSpawned < game.zombiesThisWave && zombies.length < 15) {
+      zombies.push(createZombie(game.wave));
+      game.zombiesSpawned++;
+      game.spawnTimer = game.spawnInterval;
+    }
+    if (game.zombiesSpawned >= game.zombiesThisWave && zombies.length === 0) {
+      game.waveComplete = true;
+      game.waveTimer = 150;
+    }
+  } else {
+    game.waveTimer--;
+    if (game.waveTimer <= 0) beginWave(game.wave + 1);
+  }
+
+  // ---- Actualizar zombies ----
+  for (let i = zombies.length - 1; i >= 0; i--) {
+    const z = zombies[i];
+    if (z.dying) {
+      z.dyingTimer++;
+      if (z.dyingTimer > 30) zombies.splice(i, 1);
+      continue;
+    }
+
+    // Mover hacia el jugador
+    const dx = player.x - z.x, dy = player.y - z.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    z.angle = Math.atan2(dy, dx);
+    z.wobble += 0.1;
+
+    if (dist > player.radius + z.radius) {
+      z.x += (dx / dist) * z.speed;
+      z.y += (dy / dist) * z.speed;
+    }
+
+    // Mantenerse en pantalla
+    z.x = Math.max(-50, Math.min(W + 50, z.x));
+    z.y = Math.max(-50, Math.min(H + 50, z.y));
+
+    // Flash de golpe
+    if (z.hitFlash > 0) z.hitFlash--;
+
+    // Colisión con jugador
+    if (dist < player.radius + z.radius) {
+      damagePlayer();
+      if (game.lives <= 0) return;
+    }
+  }
+
+  // ---- Actualizar power-ups en suelo ----
+  for (let i = powerups.length - 1; i >= 0; i--) {
+    const pu = powerups[i];
+    pu.life--;
+    if (pu.life <= 0) { powerups.splice(i, 1); continue; }
+
+    // Colisión con jugador
+    const dx = player.x - pu.x, dy = player.y - pu.y;
+    if (Math.sqrt(dx*dx + dy*dy) < player.radius + pu.radius) {
+      activatePowerup(pu.type);
+      spawnParticles(pu.x, pu.y, pu.type.color, 14, 4);
+      powerups.splice(i, 1);
+    }
+  }
+
+  // ---- Actualizar partículas ----
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.92; p.vy *= 0.92;
+    p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+
+  updateHUD();
+}
+
+// ---- Golpe normal (arco de ataque) ----
+function checkAttackHits() {
+  const dmg = game.activePowerup === 'double' ? player.attackDamage * 2 : player.attackDamage;
+  const range = player.attackRange + (player.weapon === 2 ? 20 : 0);
+
+  zombies.forEach(z => {
+    if (z.dying) return;
+    const dx = z.x - player.x, dy = z.y - player.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist > range) return;
+
+    // Comprueba ángulo del arco
+    const angleToZ = Math.atan2(dy, dx);
+    let diff = angleToZ - player.angle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    if (Math.abs(diff) > player.attackAngle / 2) return;
+
+    hitZombie(z, dmg);
+  });
+}
+
+// ---- Especial: onda de área ----
+function specialAttack() {
+  const radius = 180;
+  spawnParticles(player.x, player.y, '#ffffff', 30, 5);
+  spawnParticles(player.x, player.y, '#ffcc44', 20, 7);
+  zombies.forEach(z => {
+    if (z.dying) return;
+    const dx = z.x - player.x, dy = z.y - player.y;
+    if (Math.sqrt(dx*dx + dy*dy) < radius) {
+      hitZombie(z, 2);
+      // Empujar zombie
+      const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      z.x += (dx/dist) * 60;
+      z.y += (dy/dist) * 60;
+    }
+  });
+}
+
+function hitZombie(z, dmg) {
+  z.hp -= dmg;
+  z.hitFlash = 8;
+  spawnParticles(z.x, z.y, '#88ff44', 6, 2);
+  spawnParticles(z.x, z.y, '#cc2200', 4, 3);
+
+  if (z.hp <= 0) {
+    killZombie(z);
+  }
+}
+
+function killZombie(z) {
+  z.dying = true;
+  z.dyingTimer = 0;
+  game.score += z.score * game.wave;
+  game.kills++;
+  spawnParticles(z.x, z.y, '#cc2200', 14, 4);
+  spawnParticles(z.x, z.y, '#55cc44', 10, 3);
+  // Drop power-up
+  if (Math.random() < z.dropChance) {
+    spawnPowerup(z.x, z.y);
+  }
+}
+
+// ================================================================
+//  RENDER
+// ================================================================
+function render() {
+  // Limpiar
+  ctx.fillStyle = '#111a11';
+  ctx.fillRect(0, 0, W, H);
+
+  // Fondo: cuadrícula de arena
+  drawArena();
+
+  if (gameState === STATE.START) {
+    drawStartBg();
+    return;
+  }
+
+  // Power-ups en suelo
+  drawPowerups();
+  // Trail del jugador
+  drawPlayerTrail();
+  // Zombies
+  drawZombies();
+  // Jugador
+  drawPlayer();
+  // Ataque visual
+  if (player.attacking) drawAttackArc();
+  if (player.specialActive) drawSpecialWave();
+  // Partículas
+  drawParticles();
+}
+
+function drawArena() {
+  // Suelo con textura de cuadrícula
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.strokeStyle = '#33aa33';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 60) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 60) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  ctx.restore();
+
+  // Borde de la arena (foso)
+  ctx.save();
+  ctx.strokeStyle = '#224422';
+  ctx.lineWidth = 12;
+  ctx.strokeRect(6, 6, W-12, H-12);
+  ctx.strokeStyle = '#33ff55';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(10, 10, W-20, H-20);
+  ctx.restore();
+
+  // Zona central iluminada
+  const grad = ctx.createRadialGradient(W/2, H/2, 50, W/2, H/2, 400);
+  grad.addColorStop(0, 'rgba(50,120,50,0.12)');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawStartBg() {
+  // Algunos zombies de decoración en el fondo
+  ctx.save();
+  ctx.globalAlpha = 0.1;
+  for (let i = 0; i < 12; i++) {
+    const x = (i * 107 + 60) % W;
+    const y = (i * 83 + 80) % H;
+    drawZombieShape(x, y, 20, '#55cc44', 0, 0);
+  }
+  ctx.restore();
+}
+
+function drawPlayerTrail() {
+  player.trail.forEach((t, i) => {
+    ctx.save();
+    ctx.globalAlpha = t.life * 0.3;
+    ctx.fillStyle = '#4488ff';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, player.radius * t.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+function drawPlayer() {
+  const t = game.frameCount;
+  const inv = game.playerInvulnerable > 0;
+
+  ctx.save();
+  if (inv && Math.floor(t / 6) % 2 === 0) {
+    ctx.globalAlpha = 0.4;
+  }
+
+  // Sombra
+  ctx.shadowColor = player.weaponColors[player.weapon];
+  ctx.shadowBlur = 18;
+
+  // Escudo visual
+  if (game.activePowerup === 'shield') {
+    ctx.strokeStyle = '#44aaff';
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = (inv ? 0.4 : 0.7) * (0.6 + 0.4 * Math.sin(t * 0.1));
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.radius + 12, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = inv && Math.floor(t/6)%2===0 ? 0.4 : 1;
+  }
+
+  // Cuerpo del jugador
+  ctx.fillStyle = player.color;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cara: ojos
+  ctx.fillStyle = '#fff';
+  const eyeX = player.x + Math.cos(player.angle) * 10;
+  const eyeY = player.y + Math.sin(player.angle) * 10;
+  const perpX = -Math.sin(player.angle) * 6;
+  const perpY =  Math.cos(player.angle) * 6;
+  ctx.beginPath(); ctx.arc(eyeX + perpX, eyeY + perpY, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeX - perpX, eyeY - perpY, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#0044cc';
+  ctx.beginPath(); ctx.arc(eyeX + perpX + Math.cos(player.angle), eyeY + perpY + Math.sin(player.angle), 2.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(eyeX - perpX + Math.cos(player.angle), eyeY - perpY + Math.sin(player.angle), 2.5, 0, Math.PI*2); ctx.fill();
+
+  // Arma visual
+  drawWeapon();
+
+  ctx.restore();
+}
+
+function drawWeapon() {
+  const wx = player.x + Math.cos(player.angle) * 28;
+  const wy = player.y + Math.sin(player.angle) * 28;
+  const col = player.weaponColors[player.weapon];
+
+  ctx.save();
+  ctx.translate(wx, wy);
+  ctx.rotate(player.angle);
+
+  if (player.weapon === 0) {
+    // Puño
+    ctx.fillStyle = '#ffcc44';
+    ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
+  } else if (player.weapon === 1) {
+    // Mazo
+    ctx.fillStyle = '#996633';
+    ctx.fillRect(-4, -20, 8, 22);
+    ctx.fillStyle = '#cc9944';
+    ctx.fillRect(-9, -30, 18, 14);
+  } else {
+    // Motosierra
+    ctx.fillStyle = '#888';
+    ctx.fillRect(-5, -26, 10, 26);
+    ctx.fillStyle = '#ff5522';
+    ctx.fillRect(-8, -30, 16, 8);
+    if (Math.floor(game.frameCount / 3) % 2 === 0) {
+      ctx.fillStyle = '#ffcc44';
+      ctx.fillRect(-8, -30, 3, 8);
+      ctx.fillRect(5, -30, 3, 8);
+    }
+  }
+  ctx.restore();
+}
+
+function drawAttackArc() {
+  const prog = 1 - player.attackTimer / 18;
+  ctx.save();
+  ctx.globalAlpha = (1 - prog) * 0.5;
+  ctx.fillStyle = player.weaponColors[player.weapon];
+  ctx.beginPath();
+  ctx.moveTo(player.x, player.y);
+  ctx.arc(player.x, player.y,
+    player.attackRange,
+    player.angle - player.attackAngle / 2,
+    player.angle + player.attackAngle / 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSpecialWave() {
+  const prog = 1 - player.specialDuration / 25;
+  const r = 180 * prog;
+  ctx.save();
+  ctx.globalAlpha = (1 - prog) * 0.6;
+  ctx.strokeStyle = '#ffff44';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = (1 - prog) * 0.2;
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawZombies() {
+  zombies.forEach(z => {
+    if (z.dying) {
+      const alpha = 1 - z.dyingTimer / 30;
+      const scale = 1 + z.dyingTimer * 0.04;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(z.x, z.y);
+      ctx.scale(scale, scale);
+      ctx.translate(-z.x, -z.y);
+      drawZombieShape(z.x, z.y, z.radius, z.color, z.hitFlash, z.wobble, z.maxHp, z.hp, z.eyeSize);
+      ctx.restore();
+    } else {
+      ctx.save();
+      if (z.hitFlash > 0 && Math.floor(game.frameCount / 2) % 2 === 0) {
+        ctx.globalAlpha = 0.6;
+      }
+      drawZombieShape(z.x, z.y, z.radius, z.color, z.hitFlash, z.wobble, z.maxHp, z.hp, z.eyeSize);
+      // Barra de vida (solo si tiene más de 1 HP máx)
+      if (z.maxHp > 1) {
+        const bw = z.radius * 2.5;
+        const bh = 6;
+        const bx = z.x - bw / 2;
+        const by = z.y - z.radius - 12;
+        ctx.fillStyle = '#330000';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.fillStyle = '#ff3333';
+        ctx.fillRect(bx, by, bw * (z.hp / z.maxHp), bh);
+      }
+      ctx.restore();
+    }
+  });
+}
+
+function drawZombieShape(x, y, r, color, flash, wobble, maxHp, hp, eyeSize) {
+  ctx.save();
+  ctx.translate(x, y);
+  // Ligero tambaleo
+  ctx.rotate(Math.sin(wobble) * 0.15);
+
+  // Sombra
+  ctx.shadowColor = '#003300';
+  ctx.shadowBlur = 10;
+
+  // Cuerpo
+  ctx.fillStyle = flash > 0 ? '#ffffff' : color;
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Manchas oscuras (textura zombie)
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#224422';
+  ctx.beginPath(); ctx.arc(-r*0.3, r*0.2, r*0.25, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(r*0.3, -r*0.15, r*0.18, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Ojos rojos con pupila (ojos de zombie)
+  const es = eyeSize || 5;
+  ctx.fillStyle = '#cc0000';
+  ctx.beginPath(); ctx.arc(-r*0.3, -r*0.15, es, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*0.3, -r*0.15, es, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(-r*0.3, -r*0.15, es*0.4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*0.3, -r*0.15, es*0.4, 0, Math.PI*2); ctx.fill();
+  // Brillo ojo
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.beginPath(); ctx.arc(-r*0.3 + es*0.3, -r*0.15 - es*0.3, es*0.25, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc( r*0.3 + es*0.3, -r*0.15 - es*0.3, es*0.25, 0, Math.PI*2); ctx.fill();
+
+  // Boca (zigzag zombie)
+  ctx.strokeStyle = '#003300';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-r*0.35, r*0.3);
+  for (let i = 0; i <= 5; i++) {
+    ctx.lineTo(-r*0.35 + i * r*0.14,
+      r*0.3 + (i % 2 === 0 ? 0 : r*0.18));
+  }
+  ctx.stroke();
+
+  // Decoración tipo "Boss"
+  if (r >= 35) {
+    ctx.strokeStyle = '#ffcc00';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(0, 0, r + 5, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function drawPowerups() {
+  const t = game.frameCount;
+  powerups.forEach(pu => {
+    const bob = Math.sin(t * 0.08 + pu.bobOffset) * 5;
+    const alpha = Math.min(1, pu.life / 60);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = pu.type.border;
+    ctx.shadowBlur = 16;
+
+    // Círculo del power-up
+    ctx.fillStyle = pu.type.color;
+    ctx.beginPath();
+    ctx.arc(pu.x, pu.y + bob, pu.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = pu.type.border;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Icono
+    ctx.fillStyle = '#000';
+    ctx.font = `${pu.radius}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const icons = { speed: '⚡', double: '⚔', shield: '🛡' };
+    ctx.fillText(icons[pu.type.id] || '★', pu.x, pu.y + bob);
+
+    ctx.restore();
+  });
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius * p.life, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ================================================================
+//  GAME LOOP principal con throttling para PS3
+// ================================================================
+const TARGET_FPS = 30;
+const FRAME_MS   = 1000 / TARGET_FPS;
+let lastFrameTime = 0;
+
+function gameLoop(timestamp) {
+  const elapsed = timestamp - lastFrameTime;
+
+  if (elapsed >= FRAME_MS) {
+    lastFrameTime = timestamp - (elapsed % FRAME_MS);
+
+    // Leer gamepad también en pantallas de menú
+    const gp = pollGamepad();
+    if (gp && gpPrev.buttons.length === 0) {
+      for (let i = 0; i < gp.buttons.length; i++) gpPrev.buttons.push(false);
+    }
+
+    // Manejo de pantallas de menú
+    if (gameState === STATE.START) {
+      render();
+      const start = keyPressed('Space') || keyPressed('KeyZ') ||
+                    (gp && gpPressed(gp, 0));
+      if (start) {
+        screenStart.style.display = 'none';
+        initGame();
+        gameState = STATE.PLAYING;
+      }
+    } else if (gameState === STATE.PAUSED) {
+      const resume = keyPressed('Escape') || keyPressed('KeyP') ||
+                     (gp && gpPressed(gp, 2));
+      if (resume) {
+        gameState = STATE.PLAYING;
+        screenPause.style.display = 'none';
+      }
+    } else if (gameState === STATE.GAME_OVER) {
+      const restart = keyPressed('Space') || keyPressed('KeyZ') ||
+                      (gp && gpPressed(gp, 0));
+      if (restart) {
+        screenGameOver.style.display = 'none';
+        initGame();
+        gameState = STATE.PLAYING;
+      }
+    } else {
+      // PLAYING
+      update(elapsed);
+      render();
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ================================================================
+//  INICIO
+// ================================================================
+// Iniciar con render de pantalla de inicio
+render();
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
