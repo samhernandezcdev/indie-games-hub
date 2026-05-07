@@ -24,17 +24,8 @@
       url:     'games/zombie-smasher/index.html',
       genre:   'Acción',
       players: 1,
-      status:  'coming'
+      status:  'available'
     },
-    {
-      id:      'space-shooter',
-      title:   'SPACE SHOOTER',
-      desc:    'Naves alienígenas, power-ups y explosiones épicas en el espacio.',
-      url:     'games/space-shooter/index.html',
-      genre:   'Shoot em up',
-      players: 1,
-      status:  'coming'
-    }
   ];
 
   /* Referencias DOM */
